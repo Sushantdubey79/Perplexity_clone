@@ -1,9 +1,8 @@
-import { TavilyWebSearch } from "../serviceImpl/tavilyWebSearch.js";
+import { TavilyWebSearch } from "../serviceImpl/webSearchServiceImpl/tavilyWebSearch.js";
 import type { WebSearch } from "../services/webSearch.js";
 
 
 export class WebSearchFactory{
-
 
     public static getWebSearchClient(clientClass : String) : WebSearch<String>{
 
@@ -15,7 +14,6 @@ export class WebSearchFactory{
                 throw new Error("Web search client not implemented");
                 
         }
-
 
     }
 

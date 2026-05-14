@@ -1,13 +1,16 @@
 import Auth from "./Auth";
+import { useEffect } from "react";
+import { createClient, type Provider } from '@supabase/supabase-js';
 
-export default function Home(){
+const provider = 'provider' as Provider
+
+export default function Home({userData}){
 
 
     return(
 
         <div>
-            <Auth></Auth>
-        
+            Hi User , {JSON.stringify(userData)}
         </div>
 
 

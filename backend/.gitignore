@@ -6,3 +6,10 @@ node_modules
 dist/
 
 /src/generated/prisma
+
+# Compiled Prisma config outputs
+prisma.config.js
+prisma.config.cjs
+prisma.config.mjs
+prisma.config.d.ts
+prisma.config.js.map

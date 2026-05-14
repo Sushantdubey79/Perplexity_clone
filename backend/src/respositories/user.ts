@@ -3,27 +3,20 @@ import type { Prisma, PrismaClient, User } from "../generated/prisma/client.js";
 export interface CreateUserInput {
     email: string;
     name: string;
-    provider: "Google" | "Github";
+    supaBaseId : string
 }
 
 export interface UserRepository {
-    findById(id: string): Promise<User | null>;
-    findByEmail(email: string): Promise<User | null>;
+    findBySuperBaseId(id: string): Promise<User | null>;
     create(data: CreateUserInput): Promise<User>;
 }
 
 export class PrismaUserRepository implements UserRepository {
     constructor(private readonly prismaClient: PrismaClient) {}
 
-    public async findById(id: string): Promise<User | null> {
+    public async findBySuperBaseId(id: string): Promise<User | null> {
         return this.prismaClient.user.findUnique({
-            where: { id },
-        });
-    }
-
-    public async findByEmail(email: string): Promise<User | null> {
-        return this.prismaClient.user.findFirst({
-            where: { email },
+            where: { supaBaseId : id },
         });
     }
 

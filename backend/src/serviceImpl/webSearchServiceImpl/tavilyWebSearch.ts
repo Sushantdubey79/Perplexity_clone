@@ -1,8 +1,11 @@
-import type { WebSearch } from "../services/webSearch.js";
+import type { WebSearch } from "../../services/webSearch.js";
 import { tavily } from "@tavily/core";
 import type { TavilyClient } from "@tavily/core";
+import dotenv from "dotenv";
 
-export class TavilyWebSearch implements WebSearch<String> {
+dotenv.config();
+
+export class TavilyWebSearch implements WebSearch<string> {
 
     private static tavilyClient: TavilyClient;
 
@@ -16,7 +19,7 @@ export class TavilyWebSearch implements WebSearch<String> {
         }
     }
 
-    public async SearchWeb(query: string): Promise<String> {
+    public async SearchWeb(query: string): Promise<string> {
         const webSearchResults = await TavilyWebSearch.tavilyClient.search(query, { search_depth: "advanced" });
         const FormatttedSearchResults = webSearchResults.results;
         return JSON.stringify(FormatttedSearchResults);
