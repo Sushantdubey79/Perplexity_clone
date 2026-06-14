@@ -1,103 +1,102 @@
-import { type Provider , type SupabaseClient } from '@supabase/supabase-js';
 import useSupabaseClient from "../hooks/useSupabaseClient.js"
-import { useNavigate } from 'react-router';
-import axios from 'axios'
-import { config } from '../configuration/config.js';
+import Loading from "../components/Loading.js"
+import { useState } from 'react';
 
 export default function Auth(){
 
-    let supabase : SupabaseClient;
+    const { supabase } = useSupabaseClient();
+    const [loading, setLoading] = useState(false);
 
-    let navigate = useNavigate();
-
-    try{
-        supabase = useSupabaseClient().supabase;
-    }
-    catch(e){
-        console.log(e);
-        alert("Failed to Authorize the user");
-    }
 
     const checkSupabase = () => {
-
-        if (supabase !== undefined || supabase !== null){
-            return true
-        }
-        return true;
-
+        return supabase !== undefined && supabase !== null;
     }
 
     async function signInWithGoogle(){
-        
-        if (!checkSupabase()){
-            alert("Failed to Authorize the user");
-            return;
-        }
-        // ---cut---
-        const {data, error} = await supabase.auth.signInWithOAuth({
-        provider : "google",
-        options: {
-            redirectTo: `https://oluvmhuspgggpxjnsqka.supabase.co/auth/v1/callback`,
-        }
-    });
+        setLoading(true);
+        try {
+            if (!checkSupabase()){
+                alert("Failed to Authorize the user");
+                setLoading(false);
+                return;
+            }
+            const {data, error} = await supabase.auth.signInWithOAuth({
+                provider : "google",
+                options: {
+                    redirectTo: import.meta.env.VITE_SUPABASE_CALLBACK_URL,
+                }
+            });
 
-    if (error){
-        console.log(JSON.stringify(error.message));
-        
+            if (error){
+                console.log(JSON.stringify(error.message));
+                alert("Error during sign-in: " + error.message);
+                setLoading(false);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Sign-in failed");
+            setLoading(false);
+        }
     }
-    else{
-        alert("Redirecting to Home Page");
-        // const isSignUp = axios.get(`${config.BACKEND_URL}/${data}`)
-        navigate("/");
-
-        }
-
-    }
+    
     async function signInWithGithub(){
+        setLoading(true);
+        try {
+            if (!checkSupabase()){
+                alert("Failed to Authorize the user");
+                setLoading(false);
+                return;
+            }
+            const {data, error} = await supabase.auth.signInWithOAuth({
+                provider : "github",
+                options: {
+                    redirectTo: import.meta.env.VITE_SUPABASE_CALLBACK_URL,
+                }
+            });
 
-        if (!checkSupabase()){
-            alert("Failed to Authorize the user");
-            return;
+            if (error){
+                console.log(JSON.stringify(error.message));
+                alert("Error during sign-in: " + error.message);
+                setLoading(false);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Sign-in failed");
+            setLoading(false);
         }
-        // ---cut---
-        const {data, error} = await supabase.auth.signInWithOAuth({
-        provider : "github",
-        options: {
-            redirectTo: `https://oluvmhuspgggpxjnsqka.supabase.co/auth/v1/callback`,
-        }
-    });
-
-    if (error){
-        console.log(JSON.stringify(error.message));
-
-    }
-    else{
-       
-            alert("Redirecting to Home Page");
-            navigate("/");
-
-        }
-
     }
 
     async function signOut(){
-        
-        // ---cut---
-    const error = await supabase.auth.signOut();
-
-    alert("signed out")
-
+        setLoading(true);
+        try {
+            const error = await supabase.auth.signOut();
+            if (!error) {
+                setLoading(false);
+            }
+        } finally {
+            setLoading(false);
+        }
     }
 
     return(
-
-        <>
-            <div>
-                <button className="color-blue-400 p-4 border-2 mr-2" onClick={signInWithGoogle}>Sign in with google</button>
-                <button className="color-blue-400 p-4 border-2" onClick={signInWithGithub}>Sign in with Github</button>
-            </div>
-            <div>
-                <button className="color-blue-400 p-4 border-2 mt-2" onClick={signOut}>Sign Out</button>
+        <>  
+            {loading && <Loading />}
+            <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 gap-4">
+                <h1 className="text-4xl mb-8">Welcome to <span className='font-bold'>"Purr"</span>plexity</h1>
+                <button 
+                    className="bg-blue-500 text-white px-6 py-3 border-2 border-blue-500 rounded hover:bg-blue-600 disabled:opacity-50 w-60" 
+                    onClick={signInWithGoogle}
+                    disabled={loading}
+                >
+                    {loading ? "Signing in..." : "Sign in with Google"}
+                </button>
+                <button 
+                    className="bg-gray-800 text-white px-6 py-3 border-2 border-gray-800 rounded hover:bg-gray-900 disabled:opacity-50 w-60" 
+                    onClick={signInWithGithub}
+                    disabled={loading}
+                >
+                    {loading ? "Signing in..." : "Sign in with Github"}
+                </button>
             </div>
         </>
     )

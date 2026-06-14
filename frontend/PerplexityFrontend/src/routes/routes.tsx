@@ -1,78 +1,49 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "../pages/Home";
 import Auth from "../pages/Auth";
-import { useEffect, useState } from "react";
-import useSupabaseClient from "../hooks/useSupabaseClient.js";
+import Onboarding from "../pages/Onboarding";
+import Loading from "../components/Loading";
+import { useUserData } from "../hooks/useUserData.js";
+import { useState, useEffect } from "react";
+import { ConversationContextProvider } from "../context/ConversationContext";
 
-type UserData = {
+export type UserData = {
   supaBaseId: string;
-  username: string;
+  access_token: string;
   email?: string | null;
+  username? : string | null;
 };
 
 export default function Router() {
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [ready, setReady] = useState(false);
 
-  const { supabase } = useSupabaseClient();
+  const { userData, loading } = useUserData();
+  const [onboardingComplete, setOnboardingComplete] = useState(false);
 
+  // Check if user has already completed onboarding
   useEffect(() => {
-    let cancelled = false;
-
-    async function init() {
-      const cached = localStorage.getItem("userData");
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached) as UserData;
-          if (!cancelled) setUserData(parsed);
-        } catch {
-          localStorage.removeItem("userData");
-        }
-        if (!cancelled) setReady(true);
-        return;
-      }
-
-      const { data } = await supabase.auth.getSession();
-      const session = data.session;
-      if (!session?.user) {
-        if (!cancelled) setReady(true);
-        return;
-      }
-
-      const next: UserData = {
-        supaBaseId: session.user.id,
-        username: session.access_token,
-        email: session.user.email,
-      };
-      localStorage.setItem("userData", JSON.stringify(next));
-      if (!cancelled) {
-        setUserData(next);
-        setReady(true);
-      }
+    if (userData) {
+      const isOnboarded = localStorage.getItem(`onboarded_${userData.supaBaseId}`);
+      setOnboardingComplete(!!isOnboarded);
     }
+  }, [userData]);
 
-    void init();
-    return () => {
-      cancelled = true;
-    };
-  }, [supabase]);
+  if (loading) return <Loading />;
 
   const userAuth =
     userData != null && Object.keys(userData as object).length > 0;
 
-  if (!ready) {
-    return null;
-  }
 
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route
           path="/"
           element={
-            userAuth ? <Home userData={userData} /> : <Auth />
+            userAuth ? (onboardingComplete ? <ConversationContextProvider><Home /></ConversationContextProvider> : <Onboarding />) : <Auth />
           }
         />
+        <Route path="/home" element={<ConversationContextProvider><Home /></ConversationContextProvider>} />
       </Routes>
     </BrowserRouter>
   );

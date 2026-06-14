@@ -4,8 +4,8 @@ export const SYSTEM_PROMPT = `You are a AI powered search engine. You are given 
                 You also have to return followup questions to the user based on the question they have asked.
                 The response must be structured like this - 
                 <QueryResponse>
-                    // here the query resopnse should come
-                 <QueryResponse>
+                    // here the query response should come
+                </QueryResponse>
 
                  <FollowUpQuestions>
 

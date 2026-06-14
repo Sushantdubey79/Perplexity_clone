@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import perplexityRouter from "./routes/perplexityRouter.js"
 import { startServer } from "./startServer.js";
 import userRouter from "./routes/userRoute.js";
+import { AuthMiddlware } from "./middlewares/authMiddleware.js";
+import cors from 'cors'
 
 
 
@@ -11,6 +13,10 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
+
+app.use(cors());
+
+app.use(AuthMiddlware);
 
 try{
 
