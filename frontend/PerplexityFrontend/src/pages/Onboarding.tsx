@@ -10,27 +10,22 @@ export default function Onboarding() {
     const navigate = useNavigate();
     const { userData , loading } = useUserData();
     const { supabase } = useSupabaseClient();
-    const [,setProcessing] = useState(true);
     const attemptedRef = useRef(false);
     const alertShownRef = useRef(false);
 
     const handleOnboardingFailure = async (errorMsg: string) => {
-        console.error("Onboarding failed:", errorMsg);
-        
-        // Clean up
-        localStorage.removeItem("userData");
-        await supabase.auth.signOut();
-        
-        // Show alert only once
-        if (!alertShownRef.current) {
-            alertShownRef.current = true;
-            alert("Onboarding failed. Please try again");
-        }
-        
-        // Redirect to auth
-        setProcessing(false);
-        navigate("/");
-    };
+    console.error("Onboarding failed:", errorMsg);
+
+    localStorage.removeItem("userData");
+    await supabase.auth.signOut();
+
+    if (!alertShownRef.current) {
+        alertShownRef.current = true;
+        alert(`Onboarding failed: ${errorMsg}`);
+    }
+
+    navigate("/", { replace: true });
+};
 
     useEffect(() => {
         // Wait until userData is loaded
@@ -53,30 +48,13 @@ export default function Onboarding() {
                 const supabaseId = userData?.supaBaseId;
                 console.log("Onboarding: Checking if user exists with ID:", supabaseId);
                 
-                let userExists = false;
-                
-                // Check if user already exists in database
-                try {
-                    const isUserPresent = await axios.get(config.BACKEND_URL + "/user/isUser/" + supabaseId, {
-                        headers: { Authorization: userData?.access_token }
-                    })
-                    
-                    
-                    if (isUserPresent.data.success === "userExist"){
-                        console.log("Onboarding: User found in database " + JSON.stringify(isUserPresent.data));
-                        userExists = true;
-                    }
-                    else{
-                        userExists = false
-                    }
-                }
-                catch (e: any) {
-                    console.log("Onboarding: User not found in database, will create");
-                    userExists = false;
-                }
+                const isUserPresent = await axios.get(
+                    config.BACKEND_URL + "/user/isUser/" + supabaseId,
+                    { headers: { Authorization: userData?.access_token } }
+                    ).then((response) => response.data.success === "userExist").catch(() => false); // simplified
                 
                 // If user doesn't exist, create them
-                if (!userExists) {
+                if (!isUserPresent) {
                     console.log("Onboarding: Creating new user");
                     try {
                         await axios.post(config.BACKEND_URL + "/user", {
@@ -97,7 +75,6 @@ export default function Onboarding() {
                 console.log("Onboarding: Complete, navigating to home");
                 // Mark onboarding as complete
                 localStorage.setItem(`onboarded_${userData.supaBaseId}`, 'true');
-                setProcessing(false);
                 navigate("/home");
                 
             } catch (e) {
@@ -107,7 +84,7 @@ export default function Onboarding() {
         };
 
         setupUser();
-    }, [loading]);
+    }, [loading , userData, navigate, supabase]);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 gap-4">

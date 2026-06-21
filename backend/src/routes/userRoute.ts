@@ -95,7 +95,7 @@ userRouter.post("/" , async (req , res) => {
             supaBaseId : data.supaBaseId
         }
     
-    const resp = await userRepo.create(userData);
+    const resp = await userRepo.upsert(userData);
 
     res.status(200).json({
 

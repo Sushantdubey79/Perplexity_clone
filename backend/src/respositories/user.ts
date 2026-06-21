@@ -9,6 +9,7 @@ export interface CreateUserInput {
 export interface UserRepository {
     findBySuperBaseId(id: string): Promise<User | null>;
     create(data: CreateUserInput): Promise<User>;
+    upsert(data: CreateUserInput): Promise<User>; // added
 }
 
 export class PrismaUserRepository implements UserRepository {
@@ -25,4 +26,16 @@ export class PrismaUserRepository implements UserRepository {
             data: data as Prisma.UserCreateInput,
         });
     }
+
+    public async upsert(data: CreateUserInput): Promise<User> { // added
+        return this.prismaClient.user.upsert({
+            where: { supaBaseId: data.supaBaseId },
+            update: {
+                email: data.email,
+                name: data.name,
+            },
+            create: data as Prisma.UserCreateInput,
+        });
+    }
+
 }
