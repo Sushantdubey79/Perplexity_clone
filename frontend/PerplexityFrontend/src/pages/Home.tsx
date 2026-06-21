@@ -168,6 +168,7 @@ export default function Home() {
         }`}
       >
         <Sidebar
+          isSideBarOpen={isOpen}
           showIdData={handleConversationClick}
           sideBarStatus={setOpenStatus}
           sideBarData={conversationalData}

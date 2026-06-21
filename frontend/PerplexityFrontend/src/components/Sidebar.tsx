@@ -2,6 +2,7 @@ import Hamburger from "../icons/hamburger"
 
 
 export default function Sidebar({
+  isSideBarOpen,
   sideBarStatus,
   sideBarData,
   showIdData,
@@ -9,6 +10,7 @@ export default function Sidebar({
   activeConversationId,
   isLoading = false,
 }: {
+  readonly isSideBarOpen : boolean;
   readonly sideBarStatus: () => void;
   readonly sideBarData: any[];
   readonly showIdData: (conversationId: string) => void;
@@ -58,7 +60,7 @@ export default function Sidebar({
                       onClick={onNewConversation}
                       className="mb-4 w-full rounded-lg bg-indigo-600 px-3 py-2 text-left text-xs font-medium text-white hover:bg-indigo-700"
                     >
-                      + New Chat
+                      + {isSideBarOpen ? "New Chat" : ""}
                     </button>
                     <h1 className="overflow-hidden text-ellipsis whitespace-nowrap text-sm font-bold select-none">Previous Conversations</h1>
                     
