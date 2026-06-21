@@ -20,7 +20,7 @@ export default function Auth(){
                 setLoading(false);
                 return;
             }
-            const {data, error} = await supabase.auth.signInWithOAuth({
+            const { error} = await supabase.auth.signInWithOAuth({
                 provider : "google",
                 options: {
                     redirectTo: import.meta.env.VITE_SUPABASE_CALLBACK_URL,
@@ -47,7 +47,7 @@ export default function Auth(){
                 setLoading(false);
                 return;
             }
-            const {data, error} = await supabase.auth.signInWithOAuth({
+            const {error} = await supabase.auth.signInWithOAuth({
                 provider : "github",
                 options: {
                     redirectTo: import.meta.env.VITE_SUPABASE_CALLBACK_URL,
@@ -66,17 +66,17 @@ export default function Auth(){
         }
     }
 
-    async function signOut(){
-        setLoading(true);
-        try {
-            const error = await supabase.auth.signOut();
-            if (!error) {
-                setLoading(false);
-            }
-        } finally {
-            setLoading(false);
-        }
-    }
+    // async function signOut(){
+    //     setLoading(true);
+    //     try {
+    //         const error = await supabase.auth.signOut();
+    //         if (!error) {
+    //             setLoading(false);
+    //         }
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // }
 
     return(
         <>  

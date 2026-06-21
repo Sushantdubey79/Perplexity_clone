@@ -18,7 +18,7 @@ export async function AuthMiddlware(req: Request, res: Response, next: NextFunct
 
     if (client !== undefined && client !== null){
         const jwt = req.headers.authorization;
-        const {data, error} = await client.auth.getUser(jwt);
+        const {error} = await client.auth.getUser(jwt);
 
 
             if (error){

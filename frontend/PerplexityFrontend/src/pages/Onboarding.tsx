@@ -10,7 +10,7 @@ export default function Onboarding() {
     const navigate = useNavigate();
     const { userData , loading } = useUserData();
     const { supabase } = useSupabaseClient();
-    const [processing, setProcessing] = useState(true);
+    const [,setProcessing] = useState(true);
     const attemptedRef = useRef(false);
     const alertShownRef = useRef(false);
 
