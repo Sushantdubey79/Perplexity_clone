@@ -4,12 +4,12 @@ import { PrismaConversationRepository, type CreateConversation } from "../respos
 import { PrismaMessageRepository } from "../respositories/message.js";
 
 import { PrismaClientClass } from "../db/prismaClient.js";
-
-import { Prisma } from "../generated/prisma/client.js";
+ 
+import { Prisma, MessageRole } from "../generated/prisma/client.js";
 
 import type { CreateMessageInput } from "../respositories/message.js";
 
-import { MessageRole } from "../generated/prisma/client.js";
+
 
 
 const prismaClient = PrismaClientClass.getInstance();
@@ -20,6 +20,10 @@ const messageRepo = new PrismaMessageRepository(prismaClient);
 
 const userRouter = Router();
 
+const getErrorDetails = (e: unknown): string => {
+   if (e instanceof Error) return `${e.name}: ${e.message}`;
+   try { return JSON.stringify(e); } catch { return String(e); }
+ };
 
 const getUserData = async (req : Request ,res : Response) => {
     const id = req.params.id;
@@ -42,7 +46,7 @@ userRouter.get("/:id" , async (req , res) => {
 
     catch(e){
 
-        console.log("Error in creating the user " + JSON.stringify(e));
+       console.log("Error in the user create/upsert api with error " + getErrorDetails(e));
 
         if (e instanceof Prisma.PrismaClientKnownRequestError) {
             switch (e.code) {
@@ -154,57 +158,18 @@ userRouter.get('/isUser/:id' , async (req, res) => {
 
 
 
-        if (Object.keys(resp!).length > 0){
-
-            res.json({
-                "success": "userExist"
-            })
-
-        }
-        else{
-
-            res.status(404).json({
-                "error" : "user not found"
-            })
-
-        }
+        if (resp) {
+           return res.json({ "success": "userExist" });
+           }
+           return res.status(404).json({ "error": "user not found" });
 
     }
     catch(e){
 
-        console.log("Error in the search by id api with error " + JSON.stringify(e));
+        console.log("Error in the isUser api with error " + getErrorDetails(e));
+        return res.status(500).json({ "error": "Something went wrong. Please Try Again" });
 
-        if (e instanceof Prisma.PrismaClientKnownRequestError) {
-            switch (e.code) {
-                case "P2002":
-                    return res.status(409).json({
-                        error: "A user with this unique value already exists.",
-                        code: e.code,
-                    });
-                case "P2003":
-                    return res.status(400).json({
-                        error: "Invalid reference data provided.",
-                        code: e.code,
-                    });
-                case "P2025":
-                    return res.status(404).json({
-                        error: "Requested record was not found.",
-                        code: e.code,
-                    });
-                case "P2023":
-                    return res.status(400).json({
-                        error: "Malformed input for database query.",
-                        code: e.code,
-                    });
-                default:
-                    return res.status(400).json({
-                        error: "Database request failed.",
-                        code: e.code,
-                    });
-            }
-          }
-
-
+    
 }
 
 
@@ -219,7 +184,7 @@ userRouter.get('/getConversationalData/:id' , async (req, res) => {
 
 
 
-        if (Object.keys(resp!).length > 0){
+        if (resp){
 
             const conversations = await conversationRepo.findByUserId(resp?.id!);
 
